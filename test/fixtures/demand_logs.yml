@@ -1,0 +1,9 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  product: MyString
+  surge_multiplier: 9.99
+
+two:
+  product: MyString
+  surge_multiplier: 9.99
