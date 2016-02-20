@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160220005852) do
+ActiveRecord::Schema.define(version: 20160220010257) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -32,7 +32,10 @@ ActiveRecord::Schema.define(version: 20160220005852) do
     t.decimal  "surge_multiplier"
     t.datetime "created_at",       null: false
     t.datetime "updated_at",       null: false
+    t.integer  "area_id"
   end
+
+  add_index "demand_logs", ["area_id"], name: "index_demand_logs_on_area_id", using: :btree
 
   create_table "markets", force: :cascade do |t|
     t.string   "country"
@@ -43,4 +46,5 @@ ActiveRecord::Schema.define(version: 20160220005852) do
   end
 
   add_foreign_key "areas", "markets"
+  add_foreign_key "demand_logs", "areas"
 end
