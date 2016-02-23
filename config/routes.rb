@@ -9,4 +9,6 @@ Rails.application.routes.draw do
 
   # Demand Logs
   resources :demand_logs, except: [:new, :edit]
+  post '/demand_logs/filter' => 'demand_logs#filter'
+
 end
