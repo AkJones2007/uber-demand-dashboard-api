@@ -1,19 +1,25 @@
 class MarketsController < ApplicationController
   skip_before_action :verify_authenticity_token
 
-  #Show all markets
+  # Show all markets
   def index
     markets = Market.all
     render json: markets
   end
 
-  #Show market by id
+  # Show market by id
   def show
     market = Market.find(params[:id])
     render json: market
   end
 
-  #Add a market
+  # Filter markets
+  def filter
+    markets = Market.where(market_params)
+    render json: markets
+  end
+
+  # Add a market
   def create
     market = Market.new(market_params)
 

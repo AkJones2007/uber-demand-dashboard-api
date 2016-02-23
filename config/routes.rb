@@ -2,6 +2,7 @@ Rails.application.routes.draw do
 
   # Markets
   resources :markets, except: [:new, :edit]
+  post '/markets/filter' => 'markets#filter'
 
   # Areas
   resources :areas, except: [:new, :edit]
