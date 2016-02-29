@@ -9,17 +9,11 @@ class DemandLog < ActiveRecord::Base
     end
   end
 
-  def self.last_twenty_four
-    logs = DemandLog.where( created_at: 24.hours.ago..Time.now )
-    self.serialize(logs)
-  end
-
-  def self.daily_avg
-    logs = DemandLog.all
+  def self.group_by_time(logs)
     grouped_by_time = {}
     grouped_average = []
 
-    self.serialize(logs).each do |log|
+    logs.each do |log|
       time = log[:time]
       surge = log[:surge]
 
@@ -39,6 +33,16 @@ class DemandLog < ActiveRecord::Base
     end
 
     grouped_average
+  end
+
+  def self.last_twenty_four
+    logs = DemandLog.where( created_at: 24.hours.ago..Time.now )
+    self.serialize(logs)
+  end
+
+  def self.daily_avg
+    logs = self.serialize(DemandLog.all)
+    self.group_by_time(logs)
   end
 
 end
