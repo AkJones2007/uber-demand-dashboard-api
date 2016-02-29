@@ -1,9 +1,7 @@
 class DemandLog < ActiveRecord::Base
   belongs_to :area
 
-  def self.last_twenty_four
-    logs = DemandLog.where( created_at: 24.hours.ago..Time.now )
-
+  def self.serialize(logs)
     logs.collect do |log|
       time = log.created_at.strftime("%H:%M %p")
       surge = log.surge_multiplier.round(1).to_f
@@ -11,18 +9,17 @@ class DemandLog < ActiveRecord::Base
     end
   end
 
+  def self.last_twenty_four
+    logs = DemandLog.where( created_at: 24.hours.ago..Time.now )
+    self.serialize(logs)
+  end
+
   def self.daily_avg
     logs = DemandLog.all
     grouped_by_time = {}
     grouped_average = []
 
-    logs.collect! do |log|
-      time = log.created_at.strftime("%H:%M %p")
-      surge = log.surge_multiplier.round(1).to_f
-      { time: time, surge: surge }
-    end
-
-    logs.each do |log|
+    self.serialize(logs).each do |log|
       time = log[:time]
       surge = log[:surge]
 
