@@ -1,7 +1,9 @@
 class DemandLog < ActiveRecord::Base
   belongs_to :area
 
-  def self.serialize(logs)
+  # Daily
+  def self.last_twenty_four
+    logs = DemandLog.where( created_at: 24.hours.ago..Time.now )
     logs.collect do |log|
       time = log.created_at.strftime("%H:%M %p")
       surge = log.surge_multiplier.round(1).to_f
@@ -9,50 +11,41 @@ class DemandLog < ActiveRecord::Base
     end
   end
 
-  def self.group_by_time(logs)
-    grouped_by_time = {}
-    grouped_average = []
-
-    logs.each do |log|
-      time = log[:time]
-      surge = log[:surge]
-
-      unless grouped_by_time.has_key?(time)
-        grouped_by_time[time] = []
-      end
-
-      grouped_by_time[time].push(surge)
-    end
-
-    grouped_by_time.each_pair do |key, value|
-      sum = value.reduce(:+)
-      hash = {}
-      hash[:time] = key
-      hash[:surge] = (sum / value.length).round(1)
-      grouped_average.push(hash)
-    end
-
-    grouped_average
-  end
-
-  def self.last_twenty_four
-    logs = DemandLog.where( created_at: 24.hours.ago..Time.now )
-    self.serialize(logs)
-  end
-
   def self.daily_avg
-    logs = self.serialize(DemandLog.all)
-    self.group_by_time(logs)
+    hour = "EXTRACT (HOUR from created_at)"
+    minute = "EXTRACT (MINUTE from created_at)"
+    logs = DemandLog.group(hour).order(hour).group(minute).order(minute).average(:surge_multiplier)
+    serialized_logs = []
+
+    logs.each_pair do |time_array, surge_multiplier|
+      h = time_array[0].to_i
+      m = time_array[1].to_i
+      time = Time.parse("#{h}:#{m}").strftime("%I:%M %p")
+      surge = surge_multiplier.round(1).to_f
+      serialized_logs.push ({ time: time, surge: surge })
+    end
+
+    serialized_logs
   end
 
-  def self.avg_by_weekday(weekday)
-    logs = DemandLog.all
+  def self.avg_by_weekday(weekday_id)
+    weekdays = %w(Sunday Monday Tuesday Wednesday Thursday Friday Saturday)
+    weekday = "EXTRACT (DOW from created_at) = #{weekday_id}"
+    hour = "EXTRACT (HOUR from created_at)"
+    minute = "EXTRACT (MINUTE from created_at)"
+    logs = DemandLog.where(weekday).group(hour).order(hour).group(minute).order(minute).average(:surge_multiplier)
+    serialized_logs = []
 
-    filtered_by_weekday = logs.select do |log|
-      log.created_at.strftime("%^A") == weekday
+    logs.each_pair do |time_array, surge_multiplier|
+      wday = weekdays[weekday_id]
+      h = time_array[0].to_i
+      m = time_array[1].to_i
+      time = Time.parse("#{h}:#{m}").strftime("%I:%M %p")
+      surge = surge_multiplier.round(1).to_f
+      serialized_logs.push({ dow: wday, time: time, surge: surge })
     end
-    filtered_by_weekday = DemandLog.serialize(filtered_by_weekday)
-    DemandLog.group_by_time(filtered_by_weekday)
+
+    serialized_logs
   end
 
 end
