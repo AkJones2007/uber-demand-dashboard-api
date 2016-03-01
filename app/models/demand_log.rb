@@ -45,4 +45,14 @@ class DemandLog < ActiveRecord::Base
     self.group_by_time(logs)
   end
 
+  def self.avg_by_weekday(weekday)
+    logs = DemandLog.all
+
+    filtered_by_weekday = logs.select do |log|
+      log.created_at.strftime("%^A") == weekday
+    end
+    filtered_by_weekday = DemandLog.serialize(filtered_by_weekday)
+    DemandLog.group_by_time(filtered_by_weekday)
+  end
+
 end
