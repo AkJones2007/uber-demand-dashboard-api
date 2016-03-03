@@ -67,4 +67,24 @@ class DemandLog < ActiveRecord::Base
     serialized_logs
   end
 
+  def self.weekly_avg
+    weekdays = %w(Sunday Monday Tuesday Wednesday Thursday Friday Saturday)
+    weekday = "EXTRACT (DOW from created_at)"
+    hour = "EXTRACT (HOUR from created_at)"
+    logs = DemandLog.group(weekday).order(weekday).group(hour).order(hour).average(:surge_multiplier)
+    serialized_logs = []
+
+    logs.each_pair do |date, surge_multiplier|
+      dow = weekdays[date[0].to_i]
+      hour = date[1].to_i
+      time = Time.parse("#{hour}:00").strftime("%I:%M %p")
+      surge = surge_multiplier.round(1).to_f
+      serialized_logs.push({ dow: dow, time: time, surge: surge })
+    end
+
+    serialized_logs
+  end
+
+
+
 end
