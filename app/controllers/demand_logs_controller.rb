@@ -13,6 +13,30 @@ class DemandLogsController < ApplicationController
     render json: log
   end
 
+  # Find averages grouped by time
+  def find
+    method = params[:method]
+
+    if params.has_key?(:market_id)
+      market = Market.find(params[:market_id])
+      logs = []
+
+      market.areas.each do |area|
+        area_logs = area.demand_logs.send(method)
+        area_logs.each do |log|
+          logs.push(log)
+        end
+      end
+
+      render json: logs
+
+    elsif params.has_key?(:area_id)
+      area_id = params[:area_id]
+      logs = DemandLog.where(area_id: area_id).send(method)
+      render json: logs
+    end
+  end
+
   # Add a new log
   def create
     log = DemandLog.new(log_params)
