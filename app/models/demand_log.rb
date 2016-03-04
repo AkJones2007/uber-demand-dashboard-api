@@ -48,6 +48,34 @@ class DemandLog < ActiveRecord::Base
     serialized_logs
   end
 
+  def self.sunday_avg
+    self.avg_by_weekday(0)
+  end
+
+  def self.monday_avg
+    self.avg_by_weekday(1)
+  end
+
+  def self.tuesday_avg
+    self.avg_by_weekday(2)
+  end
+
+  def self.wednesday_avg
+    self.avg_by_weekday(3)
+  end
+
+  def self.thursday_avg
+    self.avg_by_weekday(4)
+  end
+
+  def self.friday_avg
+    self.avg_by_weekday(5)
+  end
+
+  def self.saturday_avg
+    self.avg_by_weekday(6)
+  end
+
   # Weekly
   def self.last_week
     weekdays = %w(Sunday Monday Tuesday Wednesday Thursday Friday Saturday)
