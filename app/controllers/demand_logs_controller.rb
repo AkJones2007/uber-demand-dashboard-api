@@ -16,13 +16,14 @@ class DemandLogsController < ApplicationController
   # Find averages grouped by time
   def find
     method = params[:method]
+    product = params[:product]
 
     if params.has_key?(:market_id)
       market = Market.find(params[:market_id])
       logs = []
 
       market.areas.each do |area|
-        area_logs = area.demand_logs.send(method)
+        area_logs = area.demand_logs.where(product: product).send(method)
         area_logs.each do |log|
           logs.push(log)
         end
@@ -32,7 +33,7 @@ class DemandLogsController < ApplicationController
 
     elsif params.has_key?(:area_id)
       area_id = params[:area_id]
-      logs = DemandLog.where(area_id: area_id).send(method)
+      logs = DemandLog.where(area_id: area_id, product: product).send(method)
       render json: logs
     end
   end
